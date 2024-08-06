@@ -1,7 +1,12 @@
 import time
+import os
 from selenium import  webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from dotenv import load_dotenv
+
+load_dotenv()
+user_data_dir = os.environ.get("USER_DATA_DIR")
 
 
 # time spent clicking before checking for the most expensive item you can buy
@@ -9,6 +14,7 @@ TIME_BEFORE_BUY = 5
 # set up driver options
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_experimental_option("detach", True)
+chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
 # chrome_options.add_argument("--incognito")
 
 driver = webdriver.Chrome(options=chrome_options)
@@ -58,12 +64,16 @@ def convert_score_to_int(score:str) -> int:
     
     score = score.replace(",", "")
     if "million" in score:
-        score.replace(" million", "")
-        return int(score) * 100000
+        score = score.replace("million", "")
+        return int(float(score) * 100000)
     else:
         return int(score)
-    
 
+# Open a new tab with JavaScript
+driver.execute_script("window.open('');")
+
+# Switch to the new tab
+driver.switch_to.window(driver.window_handles[-1])
 # goto the cookie clicker site
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 # wait 3 seconds before looking for the language prompt
